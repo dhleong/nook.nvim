@@ -1,5 +1,6 @@
 local M = {}
 
+---@param bufnr? number
 function M.setup_buffer(bufnr)
   local b = bufnr or 0
   local config = require("nook.config").create_buffer_config(b)
@@ -16,7 +17,8 @@ function M.setup_buffer(bufnr)
 end
 
 function M.try_setup_current_buffer()
-  M.setup_buffer(vim.fn.bufnr("%"))
+  -- TODO: check configs
+  -- M.setup_buffer(vim.fn.bufnr("%"))
 end
 
 function M.setup()
@@ -26,13 +28,17 @@ function M.setup()
   vim.api.nvim_create_autocmd({ "FileType" }, {
     group = augroup,
     pattern = enabled_filetypes,
-    callback = M.try_setup_current_buffer(),
+    callback = function()
+      M.setup_buffer()
+    end,
   })
-  -- TODO: ?
-  -- vim.api.nvim_create_autocmd({'BufEnter'}, {
-  --   group = augroup,
-  --   callback = M.try_setup_current_buffer()
-  -- })
+
+  vim.api.nvim_create_autocmd({ "BufEnter" }, {
+    group = augroup,
+    callback = function()
+      M.try_setup_current_buffer()
+    end,
+  })
 end
 
 return M
