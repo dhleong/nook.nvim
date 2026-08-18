@@ -9,7 +9,7 @@ function M.setup_buffer(bufnr)
   end
 
   vim.keymap.set("n", "cqc", function()
-    require("nook.editor.replish").activate(config)
+    require("nook.editor.replish").prompt_eval(config)
   end, {
     buf = b,
     desc = "Open the nook replish",

@@ -1,7 +1,7 @@
 local M = {}
 
 ---@param config NookBufConfig
-function M.activate(config)
+function M.prompt_eval(config)
   -- TODO:
   print("TODO", vim.inspect(config))
 end

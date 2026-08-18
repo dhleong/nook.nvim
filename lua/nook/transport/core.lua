@@ -1,0 +1,2 @@
+---@class NookTransport
+---@field evaluate function(string)
