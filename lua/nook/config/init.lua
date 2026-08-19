@@ -21,7 +21,14 @@ local NookBufConfig = {}
 ---@return NookBufConfig
 function M.create_buffer_config(bufnr)
   local b = bufnr or vim.fn.bufnr("%")
-  -- TODO:
+  -- TODO: User config pls
+
+  if vim.bo[bufnr].filetype == "python" then
+    return {
+      adapter = require("nook.adapter.python.repl"):new(),
+    }
+  end
+
   return {
     adapter = require("nook.adapter.webpack"):new({ url = "localhost:3333" }),
     bufnr = b,

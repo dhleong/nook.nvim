@@ -47,8 +47,10 @@ function M.try_setup_current_buffer()
 end
 
 function M.setup()
+  -- TODO:
+  local enabled_filetypes = { "typescriptreact", "javascriptreact", "python" }
+
   local augroup = vim.api.nvim_create_augroup("nook_autocmds", { clear = true })
-  local enabled_filetypes = { "typescriptreact", "javascriptreact" }
 
   vim.api.nvim_create_autocmd({ "FileType" }, {
     group = augroup,

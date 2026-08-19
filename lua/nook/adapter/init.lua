@@ -1,6 +1,6 @@
 ---@class NookAdapter
----@field connect function()
----@field evaluate function(string): string
+---@field connect fun()
+---@field evaluate fun(input: string|NookAdapterEvaluateRequest): string
 
 local M = {
   _configs = {},

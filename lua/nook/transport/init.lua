@@ -1,19 +1,20 @@
 local M = {}
 
----@param transport_ids string[]
-function M.find_first(params, transport_ids)
-  for _, id in ipairs(transport_ids) do
-    -- TODO: load the *configured* adapter
-    local transport = require("nook.transport." .. id):new()
-    local ok, result = pcall(function()
-      return transport:connect(params)
-    end)
+---@param transports NookTransport[]
+function M.find_first(transports)
+  local errors = {}
+  for _, transport in ipairs(transports) do
+    local ok, result = pcall(transport.connect, transport)
     if ok and result then
       return transport
     elseif not ok then
       -- TODO: debug logging?
+      errors[#errors + 1] = result
     end
   end
+
+  print(vim.inspect(errors))
+  error("No transport was able to connect")
 end
 
 return M

@@ -55,6 +55,7 @@ end run
 }
 
 ---@class ApplescriptBrowserJsTransportOpts
+---@field url string
 local defaults = {
   applications = {
     ["Arc"] = chrome_style,
@@ -62,7 +63,7 @@ local defaults = {
   },
 }
 
----@class ApplescriptBrowserJsTransportOpts
+---@class ApplescriptBrowserJsTransport: ApplescriptBrowserJsTransportOpts
 local ApplescriptBrowserJsTransport = {}
 
 ---@param opts? ApplescriptBrowserJsTransportOpts
@@ -80,10 +81,10 @@ function ApplescriptBrowserJsTransport:_browser_script(browser, script_kind)
 end
 
 ---@param browser string
-function ApplescriptBrowserJsTransport:_list_tabs(browser, params)
+function ApplescriptBrowserJsTransport:_list_tabs(browser)
   local proc = nio.process.run({
     cmd = "osascript",
-    args = { "-e", self:_browser_script(browser, "list"), params.url or "" },
+    args = { "-e", self:_browser_script(browser, "list"), self.url or "" },
   })
   assert(proc, "Failed to launch osascript")
   local out = strings.trim(proc.stdout.read())
@@ -103,17 +104,16 @@ function ApplescriptBrowserJsTransport:_list_tabs(browser, params)
   end, tabs)
 end
 
-function ApplescriptBrowserJsTransport:connect(params)
-  if not vim.fn.executable("osascript") then
+function ApplescriptBrowserJsTransport:connect()
+  if vim.fn.executable("osascript") == 0 then
     return false
   end
 
   for k, _ in pairs(self.applications) do
-    local tabs = self:_list_tabs(k, params)
+    local tabs = self:_list_tabs(k)
     if #tabs > 0 then
       -- TODO: Maybe... choose?
       self._last_tab = tabs[1]
-      self._last_params = params
       self._last_browser = k
 
       -- TODO: set up the websocket transport
@@ -135,7 +135,7 @@ function ApplescriptBrowserJsTransport:evaluate(input)
 
   -- TODO: We may have a new tab that we should switch to
   if not tab then
-    local tabs = self:_list_tabs(self._last_browser, self._last_params)
+    local tabs = self:_list_tabs(self._last_browser)
     if not tabs or #tabs == 0 then
       error("Tab gone")
     end

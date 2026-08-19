@@ -27,7 +27,6 @@ function M.request(request)
   local output, err = proc.stdout.read()
   proc.close()
 
-  print("output=", output, "err=", err)
   if err ~= nil then
     return false, err
   elseif request.expect == "json" and output ~= nil then

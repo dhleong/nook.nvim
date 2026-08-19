@@ -1,11 +1,11 @@
 ---@class NookEvaluateRequest
----@field kind string
 ---@field code string
 ---@field raw? boolean
 
 ---@class NookTransport
----@field destroy function()
----@field evaluate function(string|NookEvaluateRequest)
+---@field connect fun()
+---@field destroy fun()
+---@field evaluate fun(self: NookTransport, input: string|NookEvaluateRequest)
 
 local M = {}
 

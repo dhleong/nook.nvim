@@ -21,7 +21,9 @@ local WebpackAdapter = {}
 
 ---@param args WebpackAdapterOpts
 function WebpackAdapter:new(args)
-  local o = vim.tbl_deep_extend("force", {}, args or {})
+  local o = vim.tbl_deep_extend("force", {
+    name = "WebpackAdapter",
+  }, args or {})
 
   setmetatable(o, self)
   self.__index = self
@@ -37,18 +39,13 @@ function WebpackAdapter:connect()
 
   local params = { url = self.url }
 
-  local transport = require("nook.transport").find_first(params, {
-    "chrome_remote_debugging",
-    "applescript_browser_js",
+  local transport = require("nook.transport").find_first({
+    require("nook.transport.chrome_remote_debugging"):new(params),
+    require("nook.transport.applescript_browser_js"):new(params),
   })
 
-  if transport then
-    self.transport = transport
-    transport:evaluate({ code = module_helper_script, raw = true })
-    return transport
-  else
-    error("No transport")
-  end
+  self.transport = transport
+  transport:evaluate({ code = module_helper_script, raw = true })
 end
 
 function WebpackAdapter:destroy()
@@ -59,25 +56,16 @@ function WebpackAdapter:destroy()
 end
 
 function WebpackAdapter:evaluate(ctx)
-  local code
-  local bufnr
-  if type(ctx) == "string" then
-    code = ctx
-    bufnr = 0
-  else
-    code = ctx.code
-    bufnr = ctx.bufnr
-  end
-
-  if string.find(code, "$m") then
+  local request = require("nook.adapter.core").normalize(ctx)
+  if string.find(request.code, "$m") then
     error("Module code evaluation not yet supported")
   end
 
   -- TODO: extract module better and add the code to look it up
-  local module = vim.fn.bufname(bufnr)
-  code = string.gsub(code, "$m", "__nook_get_module__('" .. module .. "')")
+  local module = vim.fn.bufname(request.bufnr)
+  request.code = string.gsub(request.code, "$m", "__nook_get_module__('" .. module .. "')")
 
-  return self:connect():evaluate(code)
+  return self:connect():evaluate(request.code)
 end
 
 return WebpackAdapter

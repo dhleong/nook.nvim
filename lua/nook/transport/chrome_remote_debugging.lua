@@ -16,7 +16,7 @@ function RemoteDebuggingTransport:new(opts)
   return o
 end
 
-function RemoteDebuggingTransport:connect(params)
+function RemoteDebuggingTransport:connect()
   local ok, result = require("nook.transport.http").get_json("https://127.0.0.1/json")
   print("aha", ok, result)
   if not ok then
