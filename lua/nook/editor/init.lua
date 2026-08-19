@@ -4,7 +4,7 @@ local M = {}
 ---@param bufnr? number
 function M.setup_buffer(bufnr)
   local b = bufnr or 0
-  local config = require("nook.config").create_buffer_config(b)
+  local config = require("nook.adapter").config_for_bufnr(b)
   if not config then
     return
   end

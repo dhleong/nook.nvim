@@ -19,20 +19,33 @@ function M._identify_bufnr(bufnr)
 end
 
 ---@param bufnr number
----@return NookAdapter
-function M.for_bufnr(bufnr)
+---@return NookBufConfig?
+function M.config_for_bufnr(bufnr)
   local id = M._identify_bufnr(bufnr)
   local config = M._configs[id]
   if config then
-    return config.adapter
+    return config
   end
 
   local new_config = require("nook.config").create_buffer_config(bufnr)
+  if not new_config then
+    return nil
+  end
+
   M._configs[id] = new_config
-  return new_config.adapter
+  return new_config
 end
 
----@return NookAdapter
+---@param bufnr number
+---@return NookAdapter?
+function M.for_bufnr(bufnr)
+  local config = M.config_for_bufnr(bufnr)
+  if config then
+    return config.adapter
+  end
+end
+
+---@return NookAdapter?
 function M.get()
   return M.for_bufnr(vim.fn.bufnr("%"))
 end
