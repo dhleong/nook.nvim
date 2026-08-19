@@ -9,4 +9,8 @@ function M:new(args)
   return o
 end
 
+function M:destroy()
+  -- TODO:
+end
+
 return M

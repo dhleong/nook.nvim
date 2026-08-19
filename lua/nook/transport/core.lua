@@ -1,2 +1,3 @@
 ---@class NookTransport
+---@field destroy function()
 ---@field evaluate function(string)

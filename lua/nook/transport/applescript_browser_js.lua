@@ -108,6 +108,10 @@ function ApplescriptBrowserJsTransport:connect(params)
   return false
 end
 
+function ApplescriptBrowserJsTransport:destroy()
+  -- nop
+end
+
 function ApplescriptBrowserJsTransport:evaluate(code)
   local tab = self._last_tab
 

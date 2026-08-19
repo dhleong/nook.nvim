@@ -36,6 +36,13 @@ function WebpackAdapter:connect()
   end
 end
 
+function WebpackAdapter:destroy()
+  local transport = self.transport
+  if transport then
+    self.transport:destroy()
+  end
+end
+
 function WebpackAdapter:evaluate(ctx)
   local code
   local bufnr

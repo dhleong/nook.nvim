@@ -14,7 +14,7 @@ end
 
 --- TODO: NookAdapter type
 ---@class NookBufConfig
----@field adapter number
+---@field adapter NookAdapter
 ---@field bufnr number
 local NookBufConfig = {}
 
@@ -23,7 +23,7 @@ function M.create_buffer_config(bufnr)
   local b = bufnr or vim.fn.bufnr("%")
   -- TODO:
   return {
-    adapter = require("nook.adapters.rn_hermes"):new(),
+    adapter = require("nook.adapter.webpack"):new({ url = "localhost:3333" }),
     bufnr = b,
   }
 end

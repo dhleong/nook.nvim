@@ -8,6 +8,19 @@ function M.setup_buffer(bufnr)
     return
   end
 
+  local function nook_connect()
+    local adapter = require("nook.adapter").get()
+    if adapter then
+      require("nio").run(function()
+        adapter:connect()
+        print("Connected.")
+      end)
+    end
+  end
+  vim.api.nvim_buf_create_user_command(b, "NookConnect", nook_connect, {
+    desc = "Connect Nook",
+  })
+
   vim.keymap.set("n", "cqc", function()
     require("nook.editor.replish").prompt_eval(config)
   end, {

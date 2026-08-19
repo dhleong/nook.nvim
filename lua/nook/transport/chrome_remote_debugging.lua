@@ -27,6 +27,10 @@ function RemoteDebuggingTransport:connect(params)
   return "return" .. vim.json.encode(result)
 end
 
+function RemoteDebuggingTransport:destroy()
+  -- TODO:
+end
+
 function RemoteDebuggingTransport:evaluate(code)
   return "code " .. code
 end
