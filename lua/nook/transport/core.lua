@@ -3,9 +3,9 @@
 ---@field raw? boolean
 
 ---@class NookTransport
----@field connect fun()
----@field destroy fun()
----@field evaluate fun(self: NookTransport, input: string|NookEvaluateRequest)
+---@field connect async fun()
+---@field destroy async fun()
+---@field evaluate async fun(self: NookTransport, input: string|NookEvaluateRequest)
 
 local M = {}
 

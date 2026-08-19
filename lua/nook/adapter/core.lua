@@ -1,3 +1,7 @@
+---@class NookAdapter
+---@field connect async fun()
+---@field evaluate async fun(input: string|NookAdapterEvaluateRequest): string
+
 ---@class NookAdapterEvaluateRequest
 ---@field bufnr number
 ---@field code string
