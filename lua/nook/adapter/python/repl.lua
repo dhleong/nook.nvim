@@ -1,4 +1,14 @@
 ---@class PythonReplAdapterOpts
+local defaults = {
+  ipython = {
+    cmd = "ipython",
+    args = nil,
+  },
+  python3 = {
+    cmd = "python3",
+    args = nil,
+  },
+}
 
 ---@class PythonReplAdapter: PythonReplAdapterOpts
 ---@field transport NookTransport?
@@ -8,7 +18,7 @@ local PythonReplAdapter = {}
 function PythonReplAdapter:new(args)
   local o = vim.tbl_deep_extend("force", {
     name = "PythonReplAdapter",
-  }, args or {})
+  }, defaults, args or {})
 
   setmetatable(o, self)
   self.__index = self
@@ -25,16 +35,16 @@ function PythonReplAdapter:connect()
   local CliTransport = require("nook.transport.cli")
   self.transport = require("nook.transport").find_first({
     CliTransport:new({
+      cmd = "ipython",
+      is_prompt_line = function(line)
+        return string.gmatch(line, "In [%d]:")() ~= nil
+      end,
+    }),
+    CliTransport:new({
       cmd = "python3",
       skip_echoed_input = true,
       is_prompt_line = function(line)
         return string.find(line, ">>> ") == 1
-      end,
-    }),
-    CliTransport:new({
-      cmd = "ipython",
-      is_prompt_line = function(line)
-        return string.gmatch(line, "In [%d]:")() ~= nil
       end,
     }),
   })

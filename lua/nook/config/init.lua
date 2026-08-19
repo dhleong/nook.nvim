@@ -1,8 +1,18 @@
+---@class NookContext
+---@field bufnr number
+
+---@alias Config<T> T|nil|fun(NookContext):T
+
 ---@class NookConfig: NookOptions
 local M = {}
 
 ---@class NookOptions
-local defaults = {}
+local defaults = {
+  adapters = {
+    ---@type Config<PythonReplAdapterOpts>
+    ["python.repl"] = nil,
+  },
+}
 
 ---@type NookOptions
 local options
