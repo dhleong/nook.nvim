@@ -5,6 +5,7 @@ local strings = require("nook.util.strings")
 ---@class CliTransportOpts
 ---@field cmd string
 ---@field args? string[]
+---@field cwd? string
 ---@field skip_echoed_input? boolean
 ---@field is_prompt_line fun(line: string): boolean
 ---@field on_line? fun(line: string)
@@ -44,6 +45,7 @@ function CliTransport:connect()
   local job = vim.fn.jobstart(cmd, {
     term = true,
     stdin = "pipe",
+    cwd = self.cwd,
     on_stdout = function(_, lines)
       if #lines == 1 and lines[1] == "" then
         -- TODO: Eof

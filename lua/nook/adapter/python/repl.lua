@@ -35,9 +35,10 @@ function PythonReplAdapter:connect()
   local CliTransport = require("nook.transport.cli")
   self.transport = require("nook.transport").find_first({
     CliTransport:new({
-      cmd = "ipython",
+      cmd = self.ipython.cmd or "ipython",
+      args = self.ipython.args or nil,
       is_prompt_line = function(line)
-        return string.gmatch(line, "In [%d]:")() ~= nil
+        return string.match(line, "In %[%d%]:") ~= nil
       end,
     }),
     CliTransport:new({
