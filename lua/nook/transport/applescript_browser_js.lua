@@ -124,17 +124,18 @@ function ApplescriptBrowserJsTransport:evaluate(code)
     tab = tabs[1]
   end
 
+  local escaped = string.gsub(code, '"', '\\"')
   local wrapped = [[
   try {
     JSON.stringify({
       status: 'success',
-      result: JSON.stringify(]] .. code .. [[, null, 2)
+      result: JSON.stringify(eval("]] .. escaped .. [["), null, 2)
     })
   } catch (e) {
     JSON.stringify({
       status: 'error',
-      stack: e.stack,
-      message: e.message
+      stack: String(e.stack),
+      message: String(e.message)
     })
   }
   ]]
