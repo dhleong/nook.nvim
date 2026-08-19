@@ -1,3 +1,4 @@
+local strings = require("nook.util.strings")
 ---@class PythonReplAdapterOpts
 local defaults = {
   ipython = {
@@ -37,6 +38,11 @@ function PythonReplAdapter:connect()
     CliTransport:new({
       cmd = self.ipython.cmd or "ipython",
       args = self.ipython.args or nil,
+      env = {
+        TERM = "dumb",
+        IPY_TEST_SIMPLE_PROMPT = 1,
+        NO_COLOR = 1,
+      },
       is_prompt_line = function(line)
         return string.match(line, "In %[%d%]:") ~= nil
       end,
@@ -62,6 +68,9 @@ function PythonReplAdapter:destroy()
 end
 
 function PythonReplAdapter:evaluate(ctx)
+  if not self:connect() then
+    error("Not connected")
+  end
   local request = require("nook.adapter.core").normalize(ctx)
   return self.transport:evaluate(request.code)
 end

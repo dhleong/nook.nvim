@@ -6,9 +6,11 @@ local strings = require("nook.util.strings")
 ---@field cmd string
 ---@field args? string[]
 ---@field cwd? string
+---@field env? table
 ---@field skip_echoed_input? boolean
 ---@field is_prompt_line fun(line: string): boolean
 ---@field on_line? fun(line: string)
+---@field on_start? fun(transport: CliTransport)
 
 ---@class CliTransport: CliTransportOpts
 ---@field _has_initial_prompt boolean
@@ -46,6 +48,7 @@ function CliTransport:connect()
     term = true,
     stdin = "pipe",
     cwd = self.cwd,
+    env = self.env,
     on_stdout = function(_, lines)
       if #lines == 1 and lines[1] == "" then
         -- TODO: Eof
@@ -79,6 +82,10 @@ function CliTransport:connect()
     error("Failed to start CLI " .. self.cmd)
   end
   self._channel_id = job
+
+  if self.on_start then
+    self.on_start(self)
+  end
   return true
 end
 

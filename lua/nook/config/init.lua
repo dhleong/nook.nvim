@@ -56,7 +56,6 @@ function M.create_adapter(adapter_id, ctx)
   end
 
   local config = inflate_adapter_config(options.adapters[adapter_id], ctx)
-  print("config=", vim.inspect(config))
   if config == false then
     return nil
   end
