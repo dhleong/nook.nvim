@@ -9,33 +9,6 @@ local M = {}
 
 ---@param request HttpRequest
 function M.request(request)
-  ---@param data vim.SystemCompleted
-  --local function process_output(data)
-  --  if request.expect == "json" then
-  --    return vim.json.decode(data.stdout)
-  --  else
-  --    return data.stdout
-  --  end
-  --end
-
-  -----@param data vim.SystemCompleted
-  --local function on_exit(data)
-  --  if data.code == 0 then
-  --    cb(true, process_output(data))
-  --  else
-  --    cb(false, data)
-  --  end
-  --end
-
-  --local req = { "curl", "-s", request.url }
-  --local opts = { text = true }
-  --if cb then
-  --  print("invoke system async")
-  --  vim.system(req, opts, on_exit)
-  --else
-  --  return vim.system(req, opts)
-  --end
-
   local proc = nio.process.run({
     cmd = "curl",
     args = { "-s", request.url },
@@ -47,18 +20,20 @@ function M.request(request)
   local result = proc.result(true)
   if result ~= 0 then
     local stderr, err = proc.stderr.read()
+    proc.close()
     return false, stderr or err
   end
 
-  local result, err = proc.stdout.read()
+  local output, err = proc.stdout.read()
+  proc.close()
 
-  print("result=", result, "err=", err)
+  print("output=", output, "err=", err)
   if err ~= nil then
     return false, err
-  elseif request.expect == "json" and result ~= nil then
-    return vim.json.decode(result)
+  elseif request.expect == "json" and output ~= nil then
+    return vim.json.decode(output)
   else
-    return result
+    return output
   end
 end
 

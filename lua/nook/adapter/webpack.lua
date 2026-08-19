@@ -21,15 +21,14 @@ function WebpackAdapter:connect()
     return self.transport
   end
 
-  print("choosy transport")
   local params = { url = self.url }
 
   local transport = require("nook.transport").find_first(params, {
-    require("nook.transport.chrome_remote_debugging"):new(),
+    "chrome_remote_debugging",
+    "applescript_browser_js",
   })
 
   if transport then
-    print("chose", vim.inspect(transport))
     self.transport = transport
     return transport
   else
