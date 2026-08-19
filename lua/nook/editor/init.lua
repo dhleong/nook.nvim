@@ -1,3 +1,4 @@
+local nio = require("nio")
 local M = {}
 
 ---@param bufnr? number
@@ -9,6 +10,7 @@ function M.setup_buffer(bufnr)
   end
 
   local function nook_connect()
+    -- TODO: This should probably support user choice somehow
     local adapter = require("nook.adapter").get()
     if adapter then
       require("nio").run(function()
@@ -21,11 +23,21 @@ function M.setup_buffer(bufnr)
     desc = "Connect Nook",
   })
 
-  vim.keymap.set("n", "cqc", function()
-    require("nook.editor.replish").prompt_eval(config)
-  end, {
-    buf = b,
-    desc = "Open the nook replish",
+  vim.keymap.set(
+    "n",
+    "cqp",
+    nio.create(function()
+      require("nook.editor.replish").prompt_eval(config)
+    end),
+    {
+      buf = b,
+      desc = "Open the nook replish",
+    }
+  )
+
+  vim.keymap.set("n", "cqc", "cqp<c-f>i", {
+    remap = true,
+    desc = "Open the nook replish cmd window",
   })
 end
 

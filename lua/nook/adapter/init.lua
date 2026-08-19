@@ -1,5 +1,6 @@
 ---@class NookAdapter
 ---@field connect function()
+---@field evaluate function(string): string
 
 local M = {
   _configs = {},
