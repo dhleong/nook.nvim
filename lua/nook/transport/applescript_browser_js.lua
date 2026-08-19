@@ -1,6 +1,20 @@
 local nio = require("nio")
 local strings = require("nook.util.strings")
 
+-- NOTE: Executing JS via AppleScript *applies* to a tab, but
+-- does not directly have access to the tab's window context.
+-- We *can*, however, load a script tag that could bridge it for us...
+-- TODO: We can set up a reverse websocket transport here
+local transport_setup_script = [[
+(() => {
+  const script = document.createElement('script')
+  script.type = 'text/javascript'
+  script.text = "console.log(window.webpackChunkdiscord_app)";
+  document.body.appendChild(script);
+  return JSON.stringify({status: 'success', result: 'true'});
+})()
+]]
+
 local chrome_style = {
   list = [[
 on run argv
@@ -101,6 +115,9 @@ function ApplescriptBrowserJsTransport:connect(params)
       self._last_tab = tabs[1]
       self._last_params = params
       self._last_browser = k
+
+      -- TODO: set up the websocket transport
+      self:evaluate(transport_setup_script)
       return true
     end
   end
@@ -112,8 +129,9 @@ function ApplescriptBrowserJsTransport:destroy()
   -- nop
 end
 
-function ApplescriptBrowserJsTransport:evaluate(code)
+function ApplescriptBrowserJsTransport:evaluate(input)
   local tab = self._last_tab
+  local request = require("nook.transport.core").normalize_evaluate(input)
 
   -- TODO: We may have a new tab that we should switch to
   if not tab then
@@ -124,21 +142,24 @@ function ApplescriptBrowserJsTransport:evaluate(code)
     tab = tabs[1]
   end
 
-  local escaped = string.gsub(code, '"', '\\"')
-  local wrapped = [[
-  try {
-    JSON.stringify({
-      status: 'success',
-      result: JSON.stringify(eval("]] .. escaped .. [["), null, 2)
-    })
-  } catch (e) {
-    JSON.stringify({
-      status: 'error',
-      stack: String(e.stack),
-      message: String(e.message)
-    })
-  }
+  local wrapped = request.code
+  if not request.raw then
+    local escaped = string.gsub(request.code, '"', '\\"')
+    wrapped = [[
+try {
+  JSON.stringify({
+    status: 'success',
+    result: JSON.stringify(eval("]] .. escaped .. [["), null, 2)
+  })
+} catch (e) {
+  JSON.stringify({
+    status: 'error',
+    stack: String(e.stack),
+    message: String(e.message)
+  })
+}
   ]]
+  end
 
   local proc = nio.process.run({
     cmd = "osascript",
@@ -159,7 +180,13 @@ function ApplescriptBrowserJsTransport:evaluate(code)
 
   -- This feels kinda bad, but if we don't wrap the result
   -- object in stringify then we just get `null`...
-  local js_string = vim.json.decode(serialized)
+  local js_string = vim.json.decode(serialized, {
+    luanil = { object = true, array = true },
+  })
+  if not js_string then
+    error("unspecified syntax error")
+  end
+
   local output = vim.json.decode(js_string)
   if output.status == "success" then
     return output.result

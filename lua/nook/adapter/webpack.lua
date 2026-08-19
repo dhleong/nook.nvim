@@ -1,3 +1,17 @@
+local module_helper_script = [[
+(() => {
+window.__nook_get_module__ = (module) => {
+  const {wpreq} = window.__nook_get_module__;
+  return wpreq(module);
+};
+const webpackKey = Object.keys(window)
+  .filter((k) => k.startsWith("webpackChunk"))[0]
+if (webpackKey == null) throw new Error("webpackChunk not found");
+window[webpackKey].push([[Symbol('repl')], {}, (r) => (window.__nook_get_module__.wpreq = r)]);
+return JSON.stringify({status: 'success', result: 'true'});
+})()
+]]
+
 ---@class WebpackAdapterOpts
 ---@field url string
 ---
@@ -30,6 +44,7 @@ function WebpackAdapter:connect()
 
   if transport then
     self.transport = transport
+    transport:evaluate({ code = module_helper_script, raw = true })
     return transport
   else
     error("No transport")
@@ -54,9 +69,13 @@ function WebpackAdapter:evaluate(ctx)
     bufnr = ctx.bufnr
   end
 
+  if string.find(code, "$m") then
+    error("Module code evaluation not yet supported")
+  end
+
   -- TODO: extract module better and add the code to look it up
   local module = vim.fn.bufname(bufnr)
-  code = string.gsub(code, "$m", "get_module('" .. module .. "')")
+  code = string.gsub(code, "$m", "__nook_get_module__('" .. module .. "')")
 
   return self:connect():evaluate(code)
 end
