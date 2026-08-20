@@ -1,5 +1,6 @@
 ---@class NookAdapter
 ---@field connect async fun(self: NookAdapter)
+---@field destroy async fun(self: NookAdapter)
 ---@field evaluate async fun(self: NookAdapter, input: string|NookAdapterEvaluateRequest): string
 
 ---@class NookAdapterEvaluateRequest

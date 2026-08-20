@@ -1,4 +1,5 @@
 local M = {
+  ---@type table<string|number, NookBufConfig>
   _configs = {},
 }
 
@@ -11,24 +12,42 @@ function M._identify_bufnr(bufnr)
     end
   end
 
-  return vim.fn.getcwd(vim.fn.bufwinnr(bufnr))
+  -- TODO: What if no lsp clients are configured?
 end
 
 ---@param bufnr number
 ---@return NookBufConfig?
 function M.config_for_bufnr(bufnr)
-  local id = M._identify_bufnr(bufnr)
-  local config = M._configs[id]
+  -- NOTE: If we're quick, we might call this before
+  -- the lsp clients have a chance to initialize,
+  -- resulting in us starting without a key. To
+  -- preserve the existing transports we fall back to
+  -- keying on bufnr and "upgrade" if we later have
+  -- a key for the bufnr.
+  -- This is somewhat janky but is sufficient for now.
+  local b = bufnr
+  if b == 0 then
+    b = vim.fn.bufnr("%")
+  end
+
+  local id = M._identify_bufnr(b)
+  local key = id or b
+  local config = M._configs[key] or M._configs[b]
   if config then
+    if id and not config.key then
+      config.key = id
+      M._configs[id] = config
+    end
     return config
   end
 
-  local new_config = require("nook.config").create_buffer_config(bufnr)
+  local new_config = require("nook.config").create_buffer_config(b)
+  new_config.key = id
   if not new_config then
     return nil
   end
 
-  M._configs[id] = new_config
+  M._configs[key] = new_config
   return new_config
 end
 
@@ -53,7 +72,7 @@ end
 
 function M.reset_bufnr(bufnr)
   local id = M._identify_bufnr(bufnr)
-  local config = M._configs[id]
+  local config = M._configs[id or bufnr]
   if config then
     return config.adapter:destroy()
   end

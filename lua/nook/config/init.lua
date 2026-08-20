@@ -49,6 +49,7 @@ end
 ---@class NookBufConfig
 ---@field adapter NookAdapter
 ---@field bufnr number
+---@field key? string
 local NookBufConfig = {}
 
 ---@param adapter_id string
