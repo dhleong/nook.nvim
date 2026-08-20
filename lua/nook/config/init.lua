@@ -6,11 +6,28 @@
 ---@class NookConfig: NookOptions
 local M = {}
 
+local js_defaults = {
+  adapters = {
+    "webpack",
+  },
+}
+
 ---@class NookOptions
 local defaults = {
   adapters = {
     ---@type Config<PythonReplAdapterOpts>
     ["python.repl"] = nil,
+  },
+  filetypes = {
+    python = {
+      adapters = {
+        "python.repl",
+      },
+    },
+    typescript = js_defaults,
+    javascript = js_defaults,
+    typescriptreact = js_defaults,
+    javascriptreact = js_defaults,
   },
 }
 
@@ -72,14 +89,22 @@ function M.create_buffer_config(bufnr)
   if not b or b == 0 then
     b = vim.fn.bufnr("%")
   end
-  -- TODO: User config pls
 
   local ctx = { bufnr = b }
-  if vim.bo[bufnr].filetype == "python" then
-    return M.create_adapter("python.repl", ctx)
-  end
 
-  return M.create_adapter("webpack", ctx)
+  -- TODO: a function to choose a preferred type dynamically,
+  -- overriding filetype
+
+  local filetype = vim.bo[bufnr].filetype
+  local ft_config = require("nook.config").filetypes[filetype]
+  if ft_config then
+    for _, id in ipairs(ft_config.adapters) do
+      local adapter = M.create_adapter(id, ctx)
+      if adapter then
+        return adapter
+      end
+    end
+  end
 end
 
 setmetatable(M, {
