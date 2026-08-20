@@ -55,6 +55,16 @@ function M.prompt(config)
   return ok, input
 end
 
+---@async
+---@param config NookBufConfig
+---@param input string
+function M.eval(config, input)
+  local result = config.adapter:evaluate(input)
+  -- TODO: Store somewhere for :Last
+  return result
+end
+
+---@async
 ---@param config NookBufConfig
 function M.prompt_eval(config)
   -- Start ensuring we're connected asynchronously
@@ -64,8 +74,7 @@ function M.prompt_eval(config)
 
   local ok, input = M.prompt(config)
   if ok then
-    local result = config.adapter:evaluate(input)
-    -- TODO: Store somewhere for :Last
+    local result = M.eval(config, input)
     print(result)
   end
 end

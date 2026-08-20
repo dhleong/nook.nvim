@@ -1,4 +1,5 @@
-local nio = require("nio")
+local mappings = require("nook.editor.mappings")
+
 local M = {}
 
 ---@param bufnr? number
@@ -9,36 +10,25 @@ function M.setup_buffer(bufnr)
     return
   end
 
-  local function nook_connect()
-    -- TODO: This should probably support user choice somehow
-    local adapter = require("nook.adapter").get()
-    if adapter then
-      require("nio").run(function()
-        adapter:connect()
-        print("Connected.")
-      end)
-    end
+  for _, command in ipairs(mappings.commands) do
+    ---@type any, any
+    local name, callable = unpack(command)
+    vim.api.nvim_buf_create_user_command(b, name, callable, {
+      desc = command.desc,
+    })
   end
-  vim.api.nvim_buf_create_user_command(b, "NookConnect", nook_connect, {
-    desc = "Connect Nook",
-  })
 
-  vim.keymap.set(
-    "n",
-    "cqp",
-    nio.create(function()
-      require("nook.editor.replish").prompt_eval(config)
-    end),
-    {
-      buf = b,
-      desc = "Open the nook replish",
-    }
-  )
-
-  vim.keymap.set("n", "cqc", "cqp<c-f>i", {
-    remap = true,
-    desc = "Open the nook replish cmd window",
-  })
+  for _, keymap in ipairs(mappings.keys) do
+    ---@type any, any
+    local lhs, rhs = unpack(keymap)
+    local modes = keymap.mode or keymap.modes or "n"
+    -- TODO: Some mappings are not "core" and maybe
+    -- users prefer we don't set them?
+    keymap[1] = nil
+    keymap[2] = nil
+    keymap.layer = nil
+    vim.keymap.set(modes, lhs, rhs, keymap)
+  end
 end
 
 function M.try_setup_current_buffer()

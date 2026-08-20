@@ -46,6 +46,11 @@ function M.get()
   return M.for_bufnr(vim.fn.bufnr("%"))
 end
 
+---@return NookBufConfig?
+function M.get_config()
+  return M.config_for_bufnr(vim.fn.bufnr("%"))
+end
+
 function M.reset_bufnr(bufnr)
   local id = M._identify_bufnr(bufnr)
   local config = M._configs[id]

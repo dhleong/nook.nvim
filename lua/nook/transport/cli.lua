@@ -37,7 +37,6 @@ function CliTransport:connect()
   end
 
   if vim.fn.executable(self.cmd) == 0 then
-    print("cannot execute", self.cmd, vim.fn.executable(self.cmd))
     return false
   end
 
