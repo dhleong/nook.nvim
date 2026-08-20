@@ -26,6 +26,13 @@ local commands = {
     Callables.connect,
     desc = "[nook] Connect to REPL",
   },
+
+  {
+    "Last",
+    Callables.last,
+    bang = true,
+    desc = "[nook] Open preview window with last printed output",
+  },
 }
 
 return {

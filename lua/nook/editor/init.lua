@@ -14,6 +14,7 @@ function M.setup_buffer(bufnr)
     ---@type any, any
     local name, callable = unpack(command)
     vim.api.nvim_buf_create_user_command(b, name, callable, {
+      bang = command.bang,
       desc = command.desc,
     })
   end

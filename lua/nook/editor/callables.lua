@@ -59,6 +59,12 @@ function Callables.eval_motion(motion_type)
   end
 end
 
+---@param param vim.api.keyset.create_user_command.command_args
+function Callables.last(param)
+  local Last = require("nook.editor.last")
+  Last.show({ focus = not param.bang })
+end
+
 function Callables.prepare_eval_motion()
   local config = require_config()
   nio.run(function()

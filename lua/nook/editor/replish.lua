@@ -64,7 +64,7 @@ end
 ---@param input string
 function M.eval(config, input)
   local result = config.adapter:evaluate(input)
-  -- TODO: Store somewhere for :Last
+  require("nook.editor.last").update(config, result)
   return result
 end
 
