@@ -1,7 +1,3 @@
----@class NookAdapter
----@field connect async fun()
----@field evaluate async fun(input: string|NookAdapterEvaluateRequest): string
-
 local M = {
   _configs = {},
 }
