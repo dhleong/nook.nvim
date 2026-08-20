@@ -58,7 +58,6 @@ function M.update(config, output)
   local bufnr = M._get_bufnr()
   local lines = strings.split(output, "\n")
 
-  print(vim.inspect(lines))
   nio.api.nvim_buf_set_lines(bufnr, 0, -1, false, lines)
   vim.bo[bufnr].filetype = ft
 end
