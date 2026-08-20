@@ -24,10 +24,10 @@ function M.setup_buffer(bufnr)
     local modes = keymap.mode or keymap.modes or "n"
     -- TODO: Some mappings are not "core" and maybe
     -- users prefer we don't set them?
-    keymap[1] = nil
-    keymap[2] = nil
-    keymap.layer = nil
-    vim.keymap.set(modes, lhs, rhs, keymap)
+    vim.keymap.set(modes, lhs, rhs, {
+      remap = keymap.remap,
+      desc = keymap.desc,
+    })
   end
 end
 
