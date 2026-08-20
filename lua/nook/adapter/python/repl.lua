@@ -1,3 +1,5 @@
+local strings = require("nook.util.strings")
+
 ---@class PythonReplAdapterOpts
 local defaults = {
   ipython = {
@@ -70,8 +72,20 @@ function PythonReplAdapter:evaluate(ctx)
   if not self:connect() then
     error("Not connected")
   end
+
   local request = require("nook.adapter.core").normalize(ctx)
-  return self.transport:evaluate(request.code)
+
+  -- Clean up the code for clean repl val
+  local code = strings.trim(request.code) or ""
+  if string.find(code, "[:\t]") then
+    -- There may be a cleaner way of doing this, but
+    -- this is a vague heuristic to try to ensure we
+    -- don't leave the repl in a "waiting for you to
+    -- complete the indented region" state
+    code = code .. "\r"
+  end
+
+  return self.transport:evaluate(code)
 end
 
 return PythonReplAdapter
