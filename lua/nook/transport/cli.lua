@@ -142,4 +142,27 @@ function CliTransport:_emit_output(output)
   self._output_queue.put_nowait(strings.trim(output))
 end
 
+---@param cmd string|string[]
+---@param args string[]|nil
+---@return string, string[]|nil
+function CliTransport.compose_args(cmd, args)
+  ---@type any
+  local cmd_string = cmd
+  local cmd_args = args or {}
+  if type(cmd) == "table" then
+    cmd_string = cmd[1]
+    cmd_args = vim.list_slice(cmd, 2)
+
+    if type(args) == "table" then
+      vim.list_extend(cmd_args, args)
+    end
+  end
+
+  if #cmd_args == 0 then
+    return cmd_string, nil
+  end
+
+  return cmd_string, cmd_args
+end
+
 return CliTransport

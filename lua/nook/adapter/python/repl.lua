@@ -1,4 +1,3 @@
-local strings = require("nook.util.strings")
 ---@class PythonReplAdapterOpts
 local defaults = {
   ipython = {

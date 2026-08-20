@@ -1,5 +1,4 @@
----@class NookContext
----@field bufnr number
+local inflate_adapter_config = require("nook.config.inflate")
 
 ---@alias Config<T> T|nil|fun(NookContext):T
 
@@ -15,10 +14,17 @@ local js_defaults = {
 ---@class NookOptions
 local defaults = {
   adapters = {
+    ---@type Config<ElixirIexAdapterOpts>
+    ["elixir.iex"] = nil,
     ---@type Config<PythonReplAdapterOpts>
     ["python.repl"] = nil,
   },
   filetypes = {
+    elixir = {
+      adapters = {
+        "elixir.iex",
+      },
+    },
     python = {
       adapters = {
         "python.repl",
@@ -39,24 +45,6 @@ function M.setup(opts)
   options = vim.tbl_deep_extend("force", defaults, opts or {}) or {}
 end
 
-local function inflate_adapter_config(config, ctx)
-  if config == false then
-    return false
-  end
-
-  if type(config) == "function" then
-    return config(ctx)
-  end
-
-  if type(config) == "table" then
-    for k, v in pairs(config) do
-      config[k] = inflate_adapter_config(v, ctx)
-    end
-  end
-
-  return config
-end
-
 --- TODO: NookAdapter type
 ---@class NookBufConfig
 ---@field adapter NookAdapter
@@ -72,7 +60,13 @@ function M.create_adapter(adapter_id, ctx)
     error("Unknown adapter: " .. adapter_id)
   end
 
-  local config = inflate_adapter_config(options.adapters[adapter_id], ctx)
+  local composed = vim.tbl_deep_extend(
+    "force",
+    defaults.adapters[adapter_id] or {},
+    Type.defaults or {},
+    options.adapters[adapter_id] or {}
+  )
+  local config = inflate_adapter_config(composed, ctx)
   if config == false then
     return nil
   end
