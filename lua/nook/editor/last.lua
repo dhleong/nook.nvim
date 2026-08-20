@@ -15,7 +15,6 @@ function M._get_bufnr()
     return existing
   end
 
-  print("create new buffer")
   local bufnr = nio.api.nvim_create_buf(false, true)
   if bufnr == 0 then
     error("failed to create buffer")
