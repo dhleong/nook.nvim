@@ -1,8 +1,11 @@
 local InputHistory = require("nook.editor.input_history")
+local strings = require("nook.util.strings")
 
+---@return string
 local function perform_input()
   -- TODO: More contextual prompt?
-  return vim.fn.input("nook> ")
+  local input = vim.fn.input("nook> ")
+  return strings.trim(input) or ""
 end
 
 ---@param config NookBufConfig
@@ -15,6 +18,7 @@ local M = {
   _input_histories = vim.g.NOOK_REPL_HISTORIES or {},
 }
 
+---@param entries string[]
 local function input_with_history(entries)
   InputHistory.make_active(entries)
 
@@ -48,7 +52,7 @@ function M.prompt(config)
   local history = M._input_histories[hkey] or {}
 
   local ok, input = input_with_history(history)
-  if ok then
+  if ok and input ~= "" then
     M._insert_history(hkey, input)
   end
 
@@ -73,7 +77,7 @@ function M.prompt_eval(config)
   end)
 
   local ok, input = M.prompt(config)
-  if ok then
+  if ok and input then
     local result = M.eval(config, input)
     print(result)
   end
