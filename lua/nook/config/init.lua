@@ -61,13 +61,11 @@ function M.create_adapter(adapter_id, ctx)
     error("Unknown adapter: " .. adapter_id)
   end
 
-  local composed = vim.tbl_deep_extend(
-    "force",
+  local config = inflate_adapter_config(ctx, {
     defaults.adapters[adapter_id] or {},
     Type.defaults or {},
-    options.adapters[adapter_id] or {}
-  )
-  local config = inflate_adapter_config(composed, ctx)
+    options.adapters[adapter_id] or {},
+  })
   if config == false then
     return nil
   end
@@ -94,9 +92,11 @@ function M.create_buffer_config(bufnr)
   local ft_config = require("nook.config").filetypes[filetype]
   if ft_config then
     for _, id in ipairs(ft_config.adapters) do
-      local adapter = M.create_adapter(id, ctx)
-      if adapter then
+      local ok, adapter = pcall(M.create_adapter, id, ctx)
+      if ok and adapter then
         return adapter
+      elseif not ok then
+        print("ERROR initializing adapter", id)
       end
     end
   end
